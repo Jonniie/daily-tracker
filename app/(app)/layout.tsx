@@ -4,7 +4,7 @@ import { NavLinks } from "@/components/ui/NavLinks";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto flex h-dvh w-full max-w-6xl flex-col overflow-hidden px-4 sm:px-6">
+    <div className="mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 sm:px-6 lg:h-dvh lg:overflow-hidden">
       <header className="g-header -mx-4 flex items-center justify-between px-4 py-4 sm:-mx-6 sm:px-6">
         <Link
           href="/goals"
@@ -17,7 +17,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <ThemeToggle />
         </nav>
       </header>
-      <main className="min-h-0 flex-1 overflow-hidden pt-6 pb-4">{children}</main>
+      <main className="min-h-0 flex-1 pt-6 pb-4 lg:overflow-hidden">{children}</main>
     </div>
   );
 }

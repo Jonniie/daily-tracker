@@ -340,7 +340,7 @@ export function WeekCalendar({
 
   return (
     <div
-      className="g-enter flex min-h-0 flex-1 flex-col rounded-block bg-surface p-2.5 shadow-block sm:p-4"
+      className="g-enter flex h-[70dvh] flex-col rounded-block bg-surface p-2.5 shadow-block sm:p-4 lg:h-auto lg:min-h-0 lg:flex-1"
       style={{ "--stagger": "80ms" } as React.CSSProperties}
     >
       {/* Toolbar — view switch only; day/week stepping lives in the page header */}
@@ -377,14 +377,16 @@ export function WeekCalendar({
 
       <div
         ref={scrollerRef}
-        className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto"
+        className="min-h-0 flex-1 overflow-x-auto overflow-y-auto sm:overflow-x-hidden"
         onDragStart={onDragStart}
         onDragOver={onDragOver}
         onDrop={onDrop}
         onDragEnd={onDragEnd}
       >
         {orientation === "grid" && (
-          <div className="grid grid-cols-[52px_repeat(7,minmax(0,1fr))]">
+          // Below sm: fixed-width day columns + horizontal swipe (gutter stays
+          // sticky). sm and up: fluid columns fill the container.
+          <div className="grid grid-cols-[44px_repeat(7,minmax(64px,1fr))] sm:grid-cols-[52px_repeat(7,minmax(0,1fr))]">
             <div className="sticky top-0 left-0 z-30 bg-surface" />
             {localDays.map((day, i) => (
               <DayHeader
@@ -407,7 +409,7 @@ export function WeekCalendar({
         )}
 
         {orientation === "day" && (
-          <div className="grid grid-cols-[52px_minmax(0,1fr)]">
+          <div className="grid grid-cols-[44px_minmax(0,1fr)] sm:grid-cols-[52px_minmax(0,1fr)]">
             {HOURS.map((hour) => (
               <Fragment key={hour}>
                 <HourGutter hour={hour} />

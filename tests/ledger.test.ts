@@ -72,7 +72,8 @@ describe("dayMarkdown", () => {
     expect(md).toBe("# 2026-08-27\n");
   });
 
-  it("formatClock zero-pads", () => {
-    expect(formatClock("2026-08-27T09:05:00")).toBe("09:05");
+  it("formatClock zero-pads and renders in APP_TZ (Africa/Lagos, UTC+1)", () => {
+    // Real inputs are UTC instants (Prisma createdAt serialised with Z).
+    expect(formatClock("2026-08-27T08:05:00Z")).toBe("09:05");
   });
 });

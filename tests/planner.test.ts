@@ -1,9 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   dayListLabel,
   hourLabel,
   isValidDateKey,
   isoWeekNumber,
+  nowMinutesInAppTz,
   shiftDateKey,
   todayKey,
   weekDays,
@@ -29,6 +30,23 @@ describe("date keys", () => {
     expect(shiftDateKey("2026-08-27", 7)).toBe("2026-09-03");
     expect(shiftDateKey("2026-08-27", -7)).toBe("2026-08-20");
     expect(shiftDateKey("2026-01-01", -1)).toBe("2025-12-31");
+  });
+});
+
+describe("app-timezone now reads (APP_TZ = Africa/Lagos, UTC+1)", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("todayKey() defaults to the Lagos date, not the server's", () => {
+    vi.useFakeTimers();
+    // 23:30 UTC is 00:30 the next day in Lagos — even on a UTC server.
+    vi.setSystemTime(new Date("2026-08-28T23:30:00Z"));
+    expect(todayKey()).toBe("2026-08-29");
+  });
+
+  it("nowMinutesInAppTz() is minutes since Lagos midnight", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-28T08:05:00Z")); // 09:05 in Lagos
+    expect(nowMinutesInAppTz()).toBe(9 * 60 + 5);
   });
 });
 

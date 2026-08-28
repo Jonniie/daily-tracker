@@ -11,6 +11,7 @@ import {
   dayFullLabel,
   isValidDateKey,
   isoWeekNumber,
+  nowMinutesInAppTz,
   shiftDateKey,
   todayKey,
   weekLabel,
@@ -18,6 +19,7 @@ import {
 } from "@/lib/date-key";
 import { GoalTreeProvider } from "@/components/providers/GoalTreeProvider";
 import { WeekCalendar } from "@/components/planner/WeekCalendar";
+import { MobileDayDefault } from "@/components/planner/MobileDayDefault";
 import { DayListSidebar } from "@/components/planner/DayListSidebar";
 import { BacklogSection } from "@/components/planner/BacklogSection";
 import { GoalCoveragePanel } from "@/components/planner/GoalCoveragePanel";
@@ -34,7 +36,6 @@ export default async function TodayPage({
   const today = todayKey();
   const anchor = isValidDateKey(params.date) ? params.date : today;
   const view = params.view === "day" ? "day" : "grid";
-  const now = new Date();
 
   const yesterdayKey = shiftDateKey(today, -1);
   const [tree, week, todayPlanner, recentDays, yesterdayPlanner, coverage] =
@@ -49,13 +50,14 @@ export default async function TodayPage({
 
   return (
     <GoalTreeProvider initialTree={tree}>
-      <div className="flex h-full min-h-0 flex-col gap-4 lg:flex-row">
-        <div className="order-1 flex shrink-0 flex-col gap-4 lg:h-full lg:min-h-0 lg:w-56 lg:overflow-y-auto">
+      <MobileDayDefault hasViewParam={typeof params.view === "string"} date={anchor} />
+      <div className="flex flex-col gap-4 lg:h-full lg:min-h-0 lg:flex-row">
+        <div className="order-2 flex shrink-0 flex-col gap-4 lg:order-1 lg:h-full lg:min-h-0 lg:w-56 lg:overflow-y-auto">
           <DayListSidebar days={recentDays} selectedDate={anchor} today={today} />
           <GoalCoveragePanel coverage={coverage} />
         </div>
 
-        <div className="order-2 flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="order-1 flex min-w-0 flex-col lg:order-2 lg:min-h-0 lg:flex-1">
           <div className="mb-4 flex shrink-0 items-center justify-between">
             <div>
               <h1 className="page-title g-enter">
@@ -103,7 +105,7 @@ export default async function TodayPage({
             today={today}
             selectedDate={anchor}
             orientation={view}
-            initialNowMinutes={now.getHours() * 60 + now.getMinutes()}
+            initialNowMinutes={nowMinutesInAppTz()}
           />
           <BacklogSection
             items={todayPlanner.backlog}

@@ -1,13 +1,41 @@
 /**
- * Pure date-key utilities ("YYYY-MM-DD", server-local) — no Prisma, no
- * server-only imports. Safe for client components.
+ * Pure date-key utilities ("YYYY-MM-DD") — no Prisma, no server-only
+ * imports. Safe for client components.
+ *
+ * Timezone: "now" is read in APP_TZ (Africa/Lagos by default) via Intl, so
+ * serverless UTC and local dev agree. Explicit-Date calls stay pure
+ * local-calendar arithmetic (date shifting, week math, tests).
  */
 
-export function todayKey(now: Date = new Date()): string {
+/** App timezone for "now" reads. NEXT_PUBLIC so server and client agree. */
+export const APP_TZ = process.env.NEXT_PUBLIC_APP_TZ ?? "Africa/Lagos";
+
+const FMT_KEY = new Intl.DateTimeFormat("en-CA", {
+  timeZone: APP_TZ,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+const FMT_HM = new Intl.DateTimeFormat("en-GB", {
+  timeZone: APP_TZ,
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+export function todayKey(now?: Date): string {
+  if (now === undefined) return FMT_KEY.format(new Date()); // "now" in APP_TZ
   const y = now.getFullYear();
   const m = String(now.getMonth() + 1).padStart(2, "0");
   const d = String(now.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
+}
+
+/** Minutes since midnight in APP_TZ — seeds the calendar now-line. */
+export function nowMinutesInAppTz(now: Date = new Date()): number {
+  const [h, m] = FMT_HM.format(now).split(":").map(Number);
+  return h * 60 + m;
 }
 
 export function isValidDateKey(value: string | undefined | null): value is string {

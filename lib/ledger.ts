@@ -1,4 +1,4 @@
-import { hourLabel } from "./date-key";
+import { APP_TZ, hourLabel } from "./date-key";
 import type { BacklogItemDTO, LedgerEntryDTO, TimeBlockDTO } from "./planner";
 
 /** Ledger line kinds — drive the accent/icon in the UI. */
@@ -88,8 +88,12 @@ export function dayMarkdown(input: {
   return lines.join("\n");
 }
 
-/** "09:05" from an ISO timestamp (local). */
+/** "09:05" from an ISO timestamp, in the app timezone (APP_TZ). */
 export function formatClock(iso: string): string {
-  const d = new Date(iso);
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: APP_TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(new Date(iso));
 }
