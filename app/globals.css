@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Block Style design tokens — single source of truth.
+ * Components must consume the generated utilities (bg-bg, bg-surface,
+ * text-text-secondary, rounded-block, shadow-block, …) — never raw values.
+ */
+:root {
+  /* surfaces */
+  --color-bg: #fafaf9;
+  --color-surface: #ffffff;
+  --color-surface-recessed: #f1f0ee;
+  --color-surface-recessed-2: #e9e8e5;
+
+  /* single accent — warm terracotta */
+  --color-primary: #b0562f;
+  --color-primary-strong: #9a4826;
+  --color-primary-foreground: #ffffff;
+  --color-primary-subtle: rgb(176 86 47 / 0.1);
+
+  /* text */
+  --color-text-primary: #1a1a1c;
+  --color-text-secondary: #6b6b70;
+
+  /* completion accent (used sparingly) */
+  --color-success: #5b8c6e;
+  --color-success-subtle: rgb(91 140 110 / 0.12);
+
+  /* brutalism: solid ink borders, hard offset shadows */
+  --color-border: #1a1a1c;
+  --shadow-ink: #1a1a1c;
+  --shadow-block: 4px 4px 0 0 var(--shadow-ink);
+  --shadow-float: 7px 7px 0 0 var(--shadow-ink);
+}
+
+.dark {
+  --color-bg: #151517;
+  --color-surface: #1e1e20;
+  --color-surface-recessed: #28282b;
+  --color-surface-recessed-2: #313135;
+
+  --color-primary: #d9885f;
+  --color-primary-strong: #e49a75;
+  --color-primary-foreground: #151517;
+  --color-primary-subtle: rgb(217 136 95 / 0.16);
+
+  --color-text-primary: #f2f2f0;
+  --color-text-secondary: #9c9ca3;
+
+  --color-success: #6fa484;
+  --color-success-subtle: rgb(111 164 132 / 0.14);
+
+  --color-border: #f2f2f0;
+  --shadow-ink: rgb(242 242 240 / 0.85);
+  --shadow-block: 4px 4px 0 0 var(--shadow-ink);
+  --shadow-float: 7px 7px 0 0 var(--shadow-ink);
+}
+
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-surface-recessed: var(--color-surface-recessed);
+  --color-surface-recessed-2: var(--color-surface-recessed-2);
+  --color-primary: var(--color-primary);
+  --color-primary-strong: var(--color-primary-strong);
+  --color-primary-foreground: var(--color-primary-foreground);
+  --color-primary-subtle: var(--color-primary-subtle);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-success: var(--color-success);
+  --color-success-subtle: var(--color-success-subtle);
+  --color-border: var(--color-border);
+
+  --shadow-block: var(--shadow-block);
+  --shadow-float: var(--shadow-float);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sora), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+@theme {
+  /* brutalism: hard corners everywhere — no pills, no soft blocks */
+  --radius-block: 0px;
+  --radius-sub: 0px;
+  --radius-chip: 0px;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
+
+/* Placeholder for the contentEditable goal title editors */
+.goal-editor:empty::before {
+  content: attr(data-placeholder);
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+  pointer-events: none;
+}

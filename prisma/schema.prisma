@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+model Goal {
+  id          String   @id @default(cuid())
+  title       String
+  parentId    String?
+  parent      Goal?    @relation("GoalTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Goal[]   @relation("GoalTree")
+  isCompleted Boolean  @default(false)
+  /// Sibling sort order, scoped per-parent.
+  order       Int
+  /// Free-text category tag, e.g. Work, DSA, Personal.
+  category    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  /// Multi-tenant-ready: every query scopes by owner. See lib/auth.ts.
+  userId      String
+
+  backlogItems   BacklogItem[]
+  timeBlockLinks TimeBlockGoal[]
+
+  @@index([parentId])
+  @@index([parentId, order])
+  @@index([userId, parentId])
+}
+
+model DailyNote {
+  id     String @id @default(cuid())
+  /// "YYYY-MM-DD" in server-local time — a plain string dodges SQLite/tz drift.
+  date   String
+  userId String
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  backlogItems BacklogItem[]
+  timeBlocks   TimeBlock[]
+  ledger       LedgerEntry[]
+
+  @@unique([userId, date])
+}
+
+/// Append-only activity log for a day — the "big ledger". One line per
+/// meaningful action; `kind` drives the icon/accent, `text` is pre-rendered.
+model LedgerEntry {
+  id          String    @id @default(cuid())
+  dailyNoteId String
+  dailyNote   DailyNote @relation(fields: [dailyNoteId], references: [id], onDelete: Cascade)
+  /// planned | did | carried | goal-completed | removed
+  kind        String
+  text        String
+  createdAt   DateTime  @default(now())
+
+  @@index([dailyNoteId, createdAt])
+}
+
+model BacklogItem {
+  id          String    @id @default(cuid())
+  dailyNoteId String
+  dailyNote   DailyNote @relation(fields: [dailyNoteId], references: [id], onDelete: Cascade)
+  goalId      String
+  goal        Goal      @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  note        String?
+  createdAt   DateTime  @default(now())
+
+  /// Idempotent "send to backlog": the same goal never duplicates in a day.
+  @@unique([dailyNoteId, goalId])
+}
+
+model TimeBlock {
+  id          String    @id @default(cuid())
+  dailyNoteId String
+  dailyNote   DailyNote @relation(fields: [dailyNoteId], references: [id], onDelete: Cascade)
+  /// Hour of day, 0–23 (block start).
+  hour        Int
+  /// Length in whole hours (1 = single cell). Cells covered by a span have no row.
+  span        Int       @default(1)
+  /// Plain-prose task text. Linked goals live in `goalLinks`, not inline tokens.
+  task        String    @default("")
+  /// Set when the block was marked done; null = planned only.
+  doneAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  goalLinks TimeBlockGoal[]
+
+  @@unique([dailyNoteId, hour])
+}
+
+model TimeBlockGoal {
+  timeBlockId String
+  timeBlock   TimeBlock @relation(fields: [timeBlockId], references: [id], onDelete: Cascade)
+  goalId      String
+  goal        Goal      @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@id([timeBlockId, goalId])
+}

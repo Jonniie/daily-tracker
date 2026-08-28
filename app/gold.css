@@ -1,0 +1,211 @@
+/*
+ * gold.css — visual-redesign overlay. Loaded AFTER globals.css.
+ *
+ * Everything here is additive: remove this one import in app/layout.tsx
+ * and the app reverts to its pre-redesign visuals. No logic anywhere
+ * references these classes (className/data-attribute additions only).
+ *
+ * Layers: tokens → typography → components → atmosphere → motion.
+ */
+
+/* ── Layer 1: tokens (additions only — base palette lives in globals.css) ── */
+:root {
+  --ease-snap: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --grain-opacity: 0.03; /* print-paper grain; glow removed for flat brutalism */
+}
+
+.dark {
+  --grain-opacity: 0.035;
+}
+
+/* Brutalist frame: every block card and every chip/button/tag gets the
+   2px ink border globally — zero per-component edits needed. */
+.rounded-block,
+.rounded-chip {
+  border: 2px solid var(--color-border);
+}
+
+/* ── Layer 2: typography ─────────────────────────────────────────────── */
+.page-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: var(--color-text-primary);
+}
+
+.page-subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  letter-spacing: -0.005em;
+}
+
+/* ── Layer 5: component physics ──────────────────────────────────────── */
+
+/* Brutalist button: lift diagonal + shadow grows; press punches into the page */
+.g-btn {
+  box-shadow: 3px 3px 0 0 var(--shadow-ink);
+  transition:
+    transform 0.25s var(--ease-snap),
+    box-shadow 0.25s var(--ease-snap),
+    background-color 0.2s var(--ease-out);
+}
+.g-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 0 var(--shadow-ink);
+}
+.g-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--shadow-ink);
+  transition-duration: 0.06s;
+}
+
+/* Brutalist block: hover pops diagonally off the page */
+.g-block {
+  transition:
+    transform 0.3s var(--ease-snap),
+    box-shadow 0.3s var(--ease-snap);
+}
+.g-block:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 0 var(--shadow-ink);
+}
+
+/* Calendar event block: compact version of the same physics */
+.g-event {
+  transition:
+    transform 0.25s var(--ease-snap),
+    background-color 0.2s var(--ease-out),
+    box-shadow 0.25s var(--ease-snap);
+}
+.g-event:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 0 var(--shadow-ink);
+}
+
+/* Interactive easing upgrade: same Tailwind durations, deliberate curve.
+   (Scoped to links/buttons; spans like the now-line are unaffected.) */
+a,
+button {
+  transition-timing-function: var(--ease-snap);
+}
+
+/* ── Layer 6: atmosphere ─────────────────────────────────────────────── */
+
+/* Flat paper background — brutalism kills the ambient glow, keeps the grain */
+body {
+  background: var(--color-bg);
+}
+
+/* Film grain — felt, not seen */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Sticky header band — flat, hard 2px rule under it (no frost in brutalism) */
+.g-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--color-bg);
+  border-bottom: 2px solid var(--color-border);
+}
+
+/* Hide the scrollbar chrome while keeping scroll behavior (wheel/touch/key) */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Drag-and-drop affordances (classList-toggled, no React state) ────── */
+
+.g-drag-handle {
+  cursor: grab;
+  touch-action: none;
+}
+.g-drag-handle:active {
+  cursor: grabbing;
+}
+
+.g-dragging {
+  opacity: 0.4;
+}
+
+/* drop indicators on outliner rows */
+.g-drop-before {
+  box-shadow: inset 0 2px 0 0 var(--color-primary);
+}
+.g-drop-after {
+  box-shadow: inset 0 -2px 0 0 var(--color-primary);
+}
+.g-drop-into {
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+
+/* drop-target calendar cell */
+.g-cell-drop {
+  background: var(--color-primary-subtle);
+}
+
+/* settle "pop" on the element that just landed */
+@keyframes g-pop {
+  from {
+    transform: scale(0.92);
+    opacity: 0.5;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.g-pop {
+  animation: g-pop 0.35s var(--ease-snap);
+}
+
+/* ── Layer 7: motion ─────────────────────────────────────────────────── */
+
+@keyframes g-enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Staggered mount: <div class="g-enter" style="--stagger: 80ms"> */
+.g-enter {
+  animation: g-enter-up 0.6s var(--ease-out) both;
+  animation-delay: var(--stagger, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .g-enter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
