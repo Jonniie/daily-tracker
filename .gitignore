@@ -43,3 +43,9 @@ next-env.d.ts
 # local sqlite database
 prisma/dev.db
 prisma/dev.db-journal
+
+# AI/agent tooling (local-only, not published)
+.agents/
+AGENTS.md
+CLAUDE.md
+docs/agents/
